@@ -7,8 +7,6 @@ import com.tapsell.task3.repositories.DailyAdvertiseStatisticsRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.cassandra.core.CassandraTemplate
-import org.springframework.data.cassandra.core.InsertOptions
-import org.springframework.data.cassandra.core.insert
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
@@ -24,8 +22,8 @@ class RequestService(
 
 
     fun updateDailyEventStat(day: Long, adId: String, appId: String, newImpression: Boolean) {
-        val select = QueryBuilder.select().from("dailyAdEventStat")                 // todo make sure this exists
-                .where(QueryBuilder.eq(arrayListOf("adId, apId"), arrayListOf(adId, appId)))
+        val select = QueryBuilder.select().from("dailyEvent")                 // todo make sure this exists
+                .where(QueryBuilder.eq(mutableListOf("adId", "appId"), mutableListOf(adId, appId)))
                 .and(QueryBuilder.eq("day", day))
 
 
@@ -37,10 +35,10 @@ class RequestService(
         } else {
 
 
-            val insert = QueryBuilder.insertInto("dailyAdEventStat")
-                    .values(arrayListOf("day", "adId", "appId", "impressionCount", "clickCount"),
-                            arrayListOf(day, adId, appId, if (newImpression) 1 else 0, if (newImpression) 0 else 1))
-                    .using(QueryBuilder.ttl(50))
+//            val insert = QueryBuilder.insertInto("dailyAdEventStat")
+//                    .values(arrayListOf("day", "adId", "appId", "impressionCount", "clickCount"),
+//                            arrayListOf(day, adId, appId, if (newImpression) 1 else 0, if (newImpression) 0 else 1))
+//                    .using(QueryBuilder.ttl(50))
 
             cassandraTemplate.insert(DailyAdvertiseStatistics(day, adId, appId, if (newImpression) 1 else 0, if (newImpression) 0 else 1))
 

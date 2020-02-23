@@ -20,9 +20,11 @@ class ImpressionEventService(val requestService: RequestService) { // todo an al
     }
 
     @KafkaListener(groupId = "advertiseEvent", topics = ["impressionEv"])
-    fun popClickEvent(impressionJson: String) {
+    fun popImpressionEvent(impressionJson: String) {
         val impressionEvent = requestService.objectMapper.readValue(impressionJson, ImpressionEvent::class.java)
         val eventDay = Duration.ofMillis(impressionEvent.impressionTime).toDays()
+
+        requestService.logger.info("in the pop impression event and json is $impressionJson")
 
         requestService.updateDailyEventStat(eventDay, impressionEvent.adID, impressionEvent.appId, true)
     }

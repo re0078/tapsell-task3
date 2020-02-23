@@ -1,4 +1,4 @@
-package com.tapsell.task2.configs
+package com.tapsell.task3.configurations
 
 //import com.mongodb.MongoClientOptions
 //import com.mongodb.MongoClientURI
@@ -46,12 +46,12 @@ class KafkaConfiguration(val kafkaProperties: KafkaProperties) {
 
     @Bean
     fun createTopic1(): NewTopic {
-        return NewTopic("clickEv", 3, 1.toShort())
+        return NewTopic("clickEv", 1, 1.toShort())
     }
 
     @Bean
     fun createTopic2(): NewTopic {
-        return NewTopic("impressionEv", 3, 1.toShort())
+        return NewTopic("impressionEv", 1, 1.toShort())
     }
 
 

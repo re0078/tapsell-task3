@@ -28,7 +28,6 @@ class ClickEventService(val requestService: RequestService) {
     fun popClickEvent(clickEvJson: String) {
         val clickEvent = requestService.objectMapper.readValue(clickEvJson, ClickEvent::class.java)
         val eventDay = Duration.ofMillis(clickEvent.impressionTime).toDays() + 0 // todo omit duplication
-
         requestService.updateDailyEventStat(eventDay, clickEvent.adID, clickEvent.appId, false)
     }
 }
