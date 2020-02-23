@@ -4,6 +4,6 @@ class ClickEvent(
         val requestId: String,
         val impressionTime: Long,
         val clickTime: Long,
-        val adID: String,
+        val adId: String,
         val appId: String
 )

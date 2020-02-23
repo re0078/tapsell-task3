@@ -17,17 +17,17 @@ class CassandraConfiguration : AbstractCassandraConfiguration() {
 
 
     override fun getKeyspaceName(): String {
-        return "rrr"
+        return "advertiseStat"
     } // todo to be created
 
     override fun getContactPoints(): String {
-        return "172.30.30.138"
+        return "localhost"
     }
 
     @Bean
     override fun cluster(): CassandraClusterFactoryBean {
         val cluster = CassandraClusterFactoryBean()
-        cluster.setContactPoints("172.30.30.138")
+        cluster.setContactPoints("localhost")
         cluster.setPort(9042)
         return cluster
     }

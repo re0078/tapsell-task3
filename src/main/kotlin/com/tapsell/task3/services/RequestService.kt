@@ -22,7 +22,7 @@ class RequestService(
 
 
     fun updateDailyEventStat(day: Long, adId: String, appId: String, newImpression: Boolean) {
-        val select = QueryBuilder.select().from("dailyEvent")                 // todo make sure this exists
+        val select = QueryBuilder.select().from("dailyStat")                 // todo make sure this exists
                 .where(QueryBuilder.eq(mutableListOf("adId", "appId"), mutableListOf(adId, appId)))
                 .and(QueryBuilder.eq("day", day))
 

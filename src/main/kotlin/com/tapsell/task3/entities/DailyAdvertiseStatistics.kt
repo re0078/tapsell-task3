@@ -5,7 +5,7 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey
 import org.springframework.data.cassandra.core.mapping.Table
 
 
-@Table(value = "dailyEvent")
+@Table(value = "dailyStat")
 class DailyAdvertiseStatistics(
         @PrimaryKey(value = "")
         val day: Long,
