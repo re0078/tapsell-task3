@@ -12,31 +12,31 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import java.time.Duration
 
 
-//@Configuration
-//@EnableCaching
-//@PropertySource("classpath:application.properties")
-//class RedisConfiguration(val env: Environment) {
-//
-//    @Bean
-//    fun redisConnectionFactory(): LettuceConnectionFactory {
-//        val redisConf = RedisStandaloneConfiguration()
-//        redisConf.hostName = env.getProperty("spring.redis.host")!!
-//        redisConf.port = env.getProperty("spring.redis.port")!!.toInt()
-//        return LettuceConnectionFactory(redisConf)
-//    }
-//
-//    @Bean
-//    fun cacheConfiguration(): RedisCacheConfiguration {
-//        return RedisCacheConfiguration.defaultCacheConfig()
-//                .entryTtl(Duration.ofSeconds(600))
-//                .disableCachingNullValues()
-//    }
-//
-//    @Bean
-//    fun cacheManageCorrecter(): RedisCacheManager {
-//        return RedisCacheManager.builder(redisConnectionFactory())
-//                .cacheDefaults(cacheConfiguration())
-//                .transactionAware()
-//                .build()
-//    }
-//}
+@Configuration
+@EnableCaching
+@PropertySource("classpath:application.properties")
+class RedisConfiguration(val env: Environment) {
+
+    @Bean
+    fun redisConnectionFactory(): LettuceConnectionFactory {
+        val redisConf = RedisStandaloneConfiguration()
+        redisConf.hostName = env.getProperty("spring.redis.host")!!
+        redisConf.port = env.getProperty("spring.redis.port")!!.toInt()
+        return LettuceConnectionFactory(redisConf)
+    }
+
+    @Bean
+    fun cacheConfiguration(): RedisCacheConfiguration {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(10))
+                .disableCachingNullValues()
+    }
+
+    @Bean
+    fun cacheManageCorrecter(): RedisCacheManager {
+        return RedisCacheManager.builder(redisConnectionFactory())
+                .cacheDefaults(cacheConfiguration())
+                .transactionAware()
+                .build()
+    }
+}

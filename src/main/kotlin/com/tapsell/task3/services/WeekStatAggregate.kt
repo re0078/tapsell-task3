@@ -18,13 +18,13 @@ class WeekStatAggregate(val cassandraTemplate: CassandraTemplate,
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
 
 
-    @Scheduled(fixedRate = 10000/*, cron = "000****"*/)
+    @Scheduled(fixedRate = 60000/*, cron = "000****"*/)
     fun aggregate() {
-        val lastWeekDays = (0..6).map {
+        val lastWeekDays = (1..6).map {
             Duration.ofMillis(Date().time).toDays() - it
         }
 
-        val select = QueryBuilder.select().from("dailyStat")                 // todo make sure this exists
+        val select = QueryBuilder.select().from("dailyStat")
                 .where(QueryBuilder.`in`("day", lastWeekDays))
 
 

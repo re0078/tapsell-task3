@@ -5,4 +5,11 @@ import org.springframework.data.cassandra.repository.CassandraRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface WeekAdvertiseStatisticsRepository : CassandraRepository<WeekAdvertiseStatistics, String>
+interface WeekAdvertiseStatisticsRepository : CassandraRepository<WeekAdvertiseStatistics, String> {
+
+    fun findByAdId(adId: String): List<WeekAdvertiseStatistics>
+
+    fun findByAppId(appId: String): List<WeekAdvertiseStatistics>
+
+    fun findByAdIdAndAppId(adId: String, appId: String): List<WeekAdvertiseStatistics>
+}
