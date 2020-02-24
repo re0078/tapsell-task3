@@ -3,6 +3,7 @@ package com.tapsell.task3.services
 import com.tapsell.task3.models.ClickEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.cassandra.core.cql.WriteOptions
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -16,6 +17,7 @@ class ClickEventService(val requestService: RequestService) {
 
     fun pushClickEvent(clickEvent: ClickEvent) {
         val clickJson: String = requestService.objectMapper.writeValueAsString(clickEvent)
+
 
         logger.info("click event received : $clickEvent")
 

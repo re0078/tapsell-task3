@@ -14,8 +14,7 @@ import java.util.*
 
 @Service
 class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
-                      val weekAdStatRepo: WeekAdvertiseStatisticsRepository,
-                      val cassandraTemplate: CassandraTemplate) {
+                      val weekAdStatRepo: WeekAdvertiseStatisticsRepository) {
 
 
     private var today: Long = 0
@@ -37,14 +36,23 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
 
     }
 
+    @Cacheable(value = ["redis"], key = "#adId")
+    fun queryForAdId(adId: String): Double {
+        val todayStatList = dailyAdStatRepo.findByDayAndAdId(today, adId)
+
+        val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
+        val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }
+
+        val weekStatList = weekAdStatRepo.findByAdId(adId)
+        val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
+        val weekClickCount = weekStatList.sumBy { it.clickCount }
+
+        return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
+    }
 
     @Cacheable(value = ["redis"], key = "#appId")
     fun queryForAppId(appId: String): Double {
-        val todayStatList = cassandraTemplate.select(
-                QueryBuilder.select().from("dailyStat")
-                        .where(QueryBuilder.eq("appId", appId)).allowFiltering(),
-                DailyAdvertiseStatistics::class.java)
-
+        val todayStatList = dailyAdStatRepo.findByDayAndAppId(today, appId)
 
         val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
         val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }
@@ -56,37 +64,17 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
     }
 
-    @Cacheable(value = ["redis"], key = "#adId")
-    fun queryForAdId(adId: String): Double {
-        val todayStatList = cassandraTemplate.select(
-                QueryBuilder.select().from("dailyStat")
-                        .where(QueryBuilder.eq("adId", adId)).allowFiltering(),
-                DailyAdvertiseStatistics::class.java
-        )
-        val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
-        val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }
-
-        val weekStatList = weekAdStatRepo.findByAdId(adId)
-        val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
-        val weekClickCount = weekStatList.sumBy { it.clickCount }
-
-        return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
-    }
 
     @Cacheable(value = ["redis"], key = "{#adId, #appId}")
     fun queryForAdIdAndAppId(adId: String, appId: String): Double {
-        val todayStatList = cassandraTemplate.select(
-                QueryBuilder.select().from("dailyStat")
-                        .where(QueryBuilder.eq(arrayListOf("adId", "appId"), arrayListOf(adId, appId))).allowFiltering(),
-                DailyAdvertiseStatistics::class.java
-        )
+        val todayStatList = dailyAdStatRepo.findByDayAndAdIdAndAppId(today, adId, appId)
         val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
         val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }
 
         val weekStatList = weekAdStatRepo.findByAdIdAndAppId(adId, appId)
         val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
         val weekClickCount = weekStatList.sumBy { it.clickCount }
-
+        println("doing queries for appID and ad ID..")
         return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
     }
 
