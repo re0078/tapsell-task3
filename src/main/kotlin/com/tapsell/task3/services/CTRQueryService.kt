@@ -1,11 +1,8 @@
 package com.tapsell.task3.services
 
-import com.datastax.driver.core.querybuilder.QueryBuilder
-import com.tapsell.task3.entities.DailyAdvertiseStatistics
 import com.tapsell.task3.repositories.DailyAdvertiseStatisticsRepository
 import com.tapsell.task3.repositories.WeekAdvertiseStatisticsRepository
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.cassandra.core.CassandraTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -60,10 +57,8 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         val weekStatList = weekAdStatRepo.findByAppId(appId)
         val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
         val weekClickCount = weekStatList.sumBy { it.clickCount }
-        print("doing query .. ")
         return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
     }
-
 
     @Cacheable(value = ["redis"], key = "{#adId, #appId}")
     fun queryForAdIdAndAppId(adId: String, appId: String): Double {
