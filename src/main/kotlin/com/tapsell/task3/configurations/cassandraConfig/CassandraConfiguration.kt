@@ -1,4 +1,4 @@
-package com.tapsell.task3.configurations
+package com.tapsell.task3.configurations.cassandraConfig
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -7,7 +7,6 @@ import org.springframework.data.cassandra.config.CassandraClusterFactoryBean
 import org.springframework.data.cassandra.config.SchemaAction
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.annotation.Scheduled
 
 
 @Configuration

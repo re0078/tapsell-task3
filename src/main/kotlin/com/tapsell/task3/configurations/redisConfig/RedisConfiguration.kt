@@ -1,4 +1,4 @@
-package com.tapsell.task3.configurations
+package com.tapsell.task3.configurations.redisConfig
 
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean

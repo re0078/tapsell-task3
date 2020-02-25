@@ -1,59 +1,18 @@
-package com.tapsell.task3.configurations
+package com.tapsell.task3.configurations.kafkaConfig
 
-//import com.mongodb.MongoClientOptions
-//import com.mongodb.MongoClientURI
-import org.apache.kafka.clients.admin.NewTopic
-import org.apache.kafka.clients.producer.ProducerConfig
+import com.tapsell.task3.models.InvalidClickEventConsumerBuilder
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
-import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.cassandra.core.CassandraTemplate
-//import org.springframework.data.mongodb.MongoDbFactory
-//import org.springframework.data.mongodb.core.SimpleMongoDbFactory
-import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.*
-import org.springframework.web.context.support.GenericWebApplicationContext
+import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import java.util.*
 
-
 @Configuration
-@EnableKafka
-class KafkaConfiguration(val kafkaProperties: KafkaProperties) {
-
-
-    @Bean
-    fun producerConfigs(): Map<String, Any> {
-        val props: MutableMap<String, Any> = HashMap(kafkaProperties.buildProducerProperties())
-        props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        return props
-    }
-
-    @Bean
-    fun producerFactory(): ProducerFactory<String, String> {
-        return DefaultKafkaProducerFactory(producerConfigs())
-    }
-
-    @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(producerFactory())
-    }
-
-    @Bean
-    fun createTopic1(): NewTopic {
-        return NewTopic("clickEv", 1, 1.toShort())
-    }
-
-    @Bean
-    fun createTopic2(): NewTopic {
-        return NewTopic("impressionEv", 1, 1.toShort())
-    }
-
+class ConsumerConfiguration(val kafkaProperties: KafkaProperties) {
 
     @Bean
     fun consumerFactory(): ConsumerFactory<String, String> {
@@ -97,4 +56,17 @@ class KafkaConfiguration(val kafkaProperties: KafkaProperties) {
         return factory
     }
 
+    @Bean
+    fun invalidClickEvConsumer(): InvalidClickEventConsumerBuilder {
+        val consumerBuilder = InvalidClickEventConsumerBuilder()
+        val properties = Properties()
+        properties.setProperty("bootstrap.servers", "localhost:9092")
+        properties.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.setProperty("group.id", "advertiseEvent");
+        consumerBuilder.properties = properties
+        val topics = arrayListOf("invalidClickEv")
+        consumerBuilder.topics = topics
+        return consumerBuilder
+    }
 }

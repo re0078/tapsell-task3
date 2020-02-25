@@ -8,4 +8,5 @@ class Task3Application
 
 fun main(args: Array<String>) {
 	runApplication<Task3Application>(*args)
+
 }

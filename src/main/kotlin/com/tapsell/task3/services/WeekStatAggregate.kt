@@ -16,7 +16,7 @@ class WeekStatAggregate(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
 
 
-    @Scheduled(fixedRate = 60000/*, cron = "000****"*/) // this is set to one minutes except of one day
+    @Scheduled(fixedRate = 60000, cron = "00****") // this is set to one minutes except of one day
     fun aggregate() {
         val lastWeekDays = (1..6).map {
             Duration.ofMillis(Date().time).toDays() - it
