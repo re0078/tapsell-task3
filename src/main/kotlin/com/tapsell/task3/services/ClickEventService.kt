@@ -18,7 +18,6 @@ class ClickEventService(val requestService: RequestService) {
     fun pushClickEvent(clickEvent: ClickEvent) {
         val clickJson: String = requestService.objectMapper.writeValueAsString(clickEvent)
 
-
         logger.info("click event received : $clickEvent")
 
         requestService.kafkaTemplate.send("clickEv", clickJson)

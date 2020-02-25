@@ -9,12 +9,15 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import java.time.Duration
 
 
 @Configuration
 @EnableCaching
 @PropertySource("classpath:application.properties")
+@EnableRedisRepositories(value = ["com.tapsell.task3.repositories"])
 class RedisConfiguration(val env: Environment) {
 
     @Bean
@@ -38,5 +41,19 @@ class RedisConfiguration(val env: Environment) {
                 .cacheDefaults(cacheConfiguration())
                 .transactionAware()
                 .build()
+    }
+
+    //
+//
+//    @Bean
+//    fun jedisConnectionFactory(): JedisConnectionFactory? {
+//        return JedisConnectionFactory()
+//    }
+//
+    @Bean
+    fun redisTemplate(): RedisTemplate<String, Double>? {
+        val template = RedisTemplate<String, Double>()
+        template.setConnectionFactory(redisConnectionFactory())
+        return template
     }
 }

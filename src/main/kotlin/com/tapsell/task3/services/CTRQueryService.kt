@@ -1,8 +1,10 @@
 package com.tapsell.task3.services
 
+import com.tapsell.task3.entities.CTRStatRecord
 import com.tapsell.task3.repositories.DailyAdvertiseStatisticsRepository
 import com.tapsell.task3.repositories.WeekAdvertiseStatisticsRepository
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -11,7 +13,8 @@ import java.util.*
 
 @Service
 class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
-                      val weekAdStatRepo: WeekAdvertiseStatisticsRepository) {
+                      val weekAdStatRepo: WeekAdvertiseStatisticsRepository,
+                      val redisTemplate: RedisTemplate<String, Double>) {
 
 
     private var today: Long = 0
@@ -33,8 +36,8 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
 
     }
 
-    @Cacheable(value = ["redis"], key = "#adId")
-    fun queryForAdId(adId: String): Double {
+
+    fun queryForAdId(adId: String) {
         val todayStatList = dailyAdStatRepo.findByDayAndAdId(today, adId)
 
         val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
@@ -44,11 +47,12 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
         val weekClickCount = weekStatList.sumBy { it.clickCount }
 
-        return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
+        redisTemplate.opsForValue().set(CTRStatRecord(adId, null).stringOfAdId(),
+                (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
     }
 
     @Cacheable(value = ["redis"], key = "#appId")
-    fun queryForAppId(appId: String): Double {
+    fun queryForAppId(appId: String) {
         val todayStatList = dailyAdStatRepo.findByDayAndAppId(today, appId)
 
         val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
@@ -57,11 +61,13 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         val weekStatList = weekAdStatRepo.findByAppId(appId)
         val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
         val weekClickCount = weekStatList.sumBy { it.clickCount }
-        return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
+
+        redisTemplate.opsForValue().set(CTRStatRecord(null, appId).stringOfAppId(),
+                (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
     }
 
     @Cacheable(value = ["redis"], key = "{#adId, #appId}")
-    fun queryForAdIdAndAppId(adId: String, appId: String): Double {
+    fun queryForAdIdAndAppId(adId: String, appId: String) {
         val todayStatList = dailyAdStatRepo.findByDayAndAdIdAndAppId(today, adId, appId)
         val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
         val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }
@@ -70,7 +76,8 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
         val weekClickCount = weekStatList.sumBy { it.clickCount }
         println("doing queries for appID and ad ID..")
-        return (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
+        redisTemplate.opsForValue().set(CTRStatRecord(adId, appId).toString(),
+                (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
     }
 
 }
