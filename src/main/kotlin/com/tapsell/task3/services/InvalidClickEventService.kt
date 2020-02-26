@@ -34,9 +34,8 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
             try {
                 clickEvent = objectMapper.readValue(clickEvJson, ClickEvent::class.java)
             } catch (e: Exception) {
-                if (endOfPeriod) return
+//                if (endOfPeriod) return
                 endOfPeriod = true
-
             }
             if (!endOfPeriod) {
                 val adEvent: Optional<AdvertiseEvent> = adEventRepo.findById(clickEvent.requestId)
