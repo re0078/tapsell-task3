@@ -1,16 +1,19 @@
 package com.tapsell.task3.services
 
+import com.tapsell.task3.entities.AdvertiseEvent
 import com.tapsell.task3.models.ClickEvent
+import com.tapsell.task3.repositories.AdvertiseEventRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.cassandra.core.cql.WriteOptions
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.*
 
 
 @Service
-class ClickEventService(val requestService: RequestService) {
+class ClickEventService(val requestService: RequestService,
+                        val adEvRepo: AdvertiseEventRepository) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass.simpleName)
 
@@ -29,6 +32,14 @@ class ClickEventService(val requestService: RequestService) {
     fun popClickEvent(clickEvJson: String) {
         val clickEvent = requestService.objectMapper.readValue(clickEvJson, ClickEvent::class.java)
         val eventDay = Duration.ofMillis(clickEvent.impressionTime).toDays() + 0 // todo omit duplication
-        requestService.updateDailyEventStat(eventDay, clickEvent.adId, clickEvent.appId, false)
+        val adEvent: Optional<AdvertiseEvent> = adEvRepo.findById(clickEvent.requestId)
+        if (adEvent.isPresent) {
+            val newAdEv = adEvent.get()
+            newAdEv.clickTime = clickEvent.clickTime
+            adEvRepo.save(newAdEv)
+            requestService.updateDailyEventStat(eventDay, clickEvent.adId, clickEvent.appId, false)
+        } else {
+            requestService.kafkaTemplate.send("invalidClickEv", clickEvJson)
+        }
     }
 }

@@ -9,17 +9,17 @@ class AdvertiseEvent(
         @PrimaryKey
         val requestID: String,
         @Column
-        var adId: String?,
+        var adId: String,
         @Column
-        var adTitle: String?,
+        var adTitle: String,
+        @Column(value = "advertiseCost")
+        var advertiserCost: Double,
         @Column
-        var advertiserCost: Double?,
+        var appId: String,
         @Column
-        var appId: String?,
+        var appTitle: String,
         @Column
-        var appTitle: String?,
-        @Column
-        var impressionTime: Long?,
+        var impressionTime: Long,
         @Column
         var clickTime: Long?
 )

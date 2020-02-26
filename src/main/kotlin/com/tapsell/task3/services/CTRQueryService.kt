@@ -19,7 +19,7 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
 
     private var today: Long = 0
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1800000) // 30 minutes
     fun startQuery() {
         today = Duration.ofMillis(Date().time).toDays()
         dailyAdStatRepo.findByDay(today).forEach {
