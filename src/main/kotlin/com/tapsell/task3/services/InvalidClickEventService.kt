@@ -18,30 +18,34 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
 
     private val invalidEvConsumer = invalidClickConsumerBuilder.build()
 
-    enum class Margin {
-        CLICK_EVENT_MARGIN
+    enum class Margin(val string: String) {
+        CLICK_EVENT_MARGIN("CLICK_EVENT_MARGIN")
     }
 
     @Scheduled(fixedRate = 120000, initialDelay = 125000) // 2 minutes and 5 seconds delay and then do this task every 2 minutes
     fun readInvalidEvents() {
-
-        while (true) {
+        println("read invalid function called")
+        val records: ConsumerRecords<String, String>? = invalidEvConsumer.poll(1000)
+        var endOfPeriod = false
+        records?.forEach { record ->
+            val clickEvJson: String = record.value()
+            println("invalid key of $clickEvJson found")
+            var clickEvent: ClickEvent = ClickEvent("", 0, 0, "", "")
             try {
-                val records: ConsumerRecords<String, String>? = invalidEvConsumer.poll(1000)
-                records?.forEach { record ->
-                    val clickEvJson = record.value()
-                    val clickEvent = objectMapper.readValue(clickEvJson, ClickEvent::class.java)
-                    val adEvent: Optional<AdvertiseEvent> = adEventRepo.findById(clickEvent.requestId)
-                    if (adEvent.isPresent) {
-                        adEvent.get().clickTime = clickEvent.clickTime
-                        adEventRepo.save(adEvent.get())
-                    }
-                }
-                // just one record is polled because of one single topic
+                clickEvent = objectMapper.readValue(clickEvJson, ClickEvent::class.java)
             } catch (e: Exception) {
-                // happens when a CLICK_EVENT_MARGIN is read
-                print(" --->   end of 2 minutes\t")
-                break
+                if (endOfPeriod) return
+                endOfPeriod = true
+
+            }
+            if (!endOfPeriod) {
+                val adEvent: Optional<AdvertiseEvent> = adEventRepo.findById(clickEvent.requestId)
+                if (adEvent.isPresent) {
+                    adEvent.get().clickTime = clickEvent.clickTime
+                    adEventRepo.save(adEvent.get())
+                }
+            } else {
+                requestService.kafkaTemplate.send("invalidClickEv", record.value())
             }
         }
     }
@@ -49,8 +53,7 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
 
     @Scheduled(fixedRate = 120000) // creating period margin for invalid click consumer to seperate clicks of specific periods of 2 minutes
     fun sendMargin() {
-        val json = objectMapper.writeValueAsString(Margin.CLICK_EVENT_MARGIN)
-        requestService.kafkaTemplate.send("invalidClickEv", json)
+        requestService.kafkaTemplate.send("invalidClickEv", Margin.CLICK_EVENT_MARGIN.string)
     }
 
 }
