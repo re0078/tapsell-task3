@@ -8,6 +8,7 @@ import org.springframework.data.cassandra.core.mapping.Table
 class WeekAdvertiseStatistics(
         @PrimaryKey
         val adId: String,
+        // Why isn't appId among primary keys?
         @Column
         val appId: String,
         @Column

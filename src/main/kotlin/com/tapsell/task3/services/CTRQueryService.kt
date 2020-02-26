@@ -36,7 +36,7 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
 
     }
 
-
+    // Fix the duplication in the three functions below.
     fun queryForAdId(adId: String) {
         val todayStatList = dailyAdStatRepo.findByDayAndAdId(today, adId)
 
@@ -51,6 +51,7 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
                 (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
     }
 
+    // Why @Cacheable?
     @Cacheable(value = ["redis"], key = "#appId")
     fun queryForAppId(appId: String) {
         val todayStatList = dailyAdStatRepo.findByDayAndAppId(today, appId)

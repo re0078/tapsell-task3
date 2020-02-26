@@ -23,6 +23,7 @@ class ClickEventService(val requestService: RequestService,
 
         logger.info("click event received : $clickEvent")
 
+        // It's better to use constants for topic names
         requestService.kafkaTemplate.send("clickEv", clickJson)
 
         logger.info("click event ${clickEvent.requestId} sent to kafka queue")
@@ -37,6 +38,7 @@ class ClickEventService(val requestService: RequestService,
             val newAdEv = adEvent.get()
             newAdEv.clickTime = clickEvent.clickTime
             adEvRepo.save(newAdEv)
+            // It's better to minimize function arguments. In this case you could pass the whole clickEvent
             requestService.updateDailyEventStat(eventDay, clickEvent.adId, clickEvent.appId, false)
         } else {
             requestService.kafkaTemplate.send("invalidClickEv", clickEvJson)

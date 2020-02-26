@@ -12,10 +12,12 @@ interface DailyAdvertiseStatisticsRepository : CassandraRepository<DailyAdvertis
 
     fun findByDayIn(days: List<Long>): List<DailyAdvertiseStatistics>
 
+    // It's better to use constants for keyspace and table names plus TTL
     @Query(value = "INSERT INTO advertiseStat.dailyStat (day, adId, appId, impressionCount, clickCount)" +
             " VALUES (?0, ?1, ?2, ?3, ?4) USING ttl 86400") // time to live set to one day
     fun insertRecord(day: Long, adId: String, appId: String, impressionCount: Int, clickCount: Int)
 
+    // Allow Filtering should not be used in the following queries. Suitable primary keys should be designed.
     @Query(value = "SELECT * FROM dailyStat WHERE day=?0 AND adId=?1 ALLOW FILTERING")
     fun findByDayAndAdId(day: Long, adId: String): List<DailyAdvertiseStatistics>
 

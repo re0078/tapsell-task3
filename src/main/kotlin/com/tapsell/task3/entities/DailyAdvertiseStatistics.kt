@@ -9,6 +9,7 @@ import org.springframework.data.cassandra.core.mapping.Table
 class DailyAdvertiseStatistics(
         @PrimaryKey(value = "")
         val day: Long,
+        // Why aren't addId and appId among primary keys?
         @Column
         val adId: String,
         @Column

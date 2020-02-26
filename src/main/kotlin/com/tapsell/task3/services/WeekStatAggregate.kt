@@ -16,6 +16,9 @@ class WeekStatAggregate(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
 
 
+    /* This implementation is not memory efficient because it reads all the week. Remember the whole point of this
+        job and optimize it's memory usage.
+     */
     @Scheduled(/*fixedRate = 60000, */cron = "0 0 0 * * *") // this is set to one minutes except of one day
     fun aggregate() {
         val lastWeekDays = (1..6).map {

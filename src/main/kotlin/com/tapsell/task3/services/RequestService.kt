@@ -17,10 +17,14 @@ class RequestService(
     val logger: Logger = LoggerFactory.getLogger(javaClass.simpleName)
 
 
+    // There is a better way to handle newImpressions instead of the boolean field. Try to implement it.
     fun updateDailyEventStat(day: Long, adId: String, appId: String, newImpression: Boolean) {
         val dailyAdStatList = dailyAdEvRepo.findByDayAndAdIdAndAppId(day, adId, appId)
 
         if (dailyAdStatList.isNotEmpty()) {
+            /* I believe you can set the return type of findByDayAndAdIdAndAppId function to DailyAdvertiseStatistics?
+                instead of a List.
+             */
             val dailyAdStat = dailyAdStatList[0] // there is only one element in the list
             if (newImpression) dailyAdStat.impressionCount += 1 else dailyAdStat.clickCount += 1
             dailyAdEvRepo.insertRecord(dailyAdStat.day, dailyAdStat.adId, dailyAdStat.appId, dailyAdStat.impressionCount, dailyAdStat.clickCount)

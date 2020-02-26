@@ -16,12 +16,18 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
                                val adEventRepo: AdvertiseEventRepository,
                                val requestService: RequestService) {
 
+    // This could be a bean
     private val invalidEvConsumer = invalidClickConsumerBuilder.build()
 
     enum class Margin(val string: String) {
         CLICK_EVENT_MARGIN("CLICK_EVENT_MARGIN")
     }
 
+    /*
+        The way you implemented this is so complicated and unclear. It's better to make it simple: Every 2 minutes,
+        consume all the available records in the topic and for each record if the associated adEvent is not preset,
+        push it into the topic.
+     */
     @Scheduled(fixedRate = 120000, initialDelay = 125000) // 2 minutes and 5 seconds delay and then do this task every 2 minutes
     fun readInvalidEvents() {
         println("read invalid function called")
