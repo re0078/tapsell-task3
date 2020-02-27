@@ -1,6 +1,5 @@
 package com.tapsell.task3.services
 
-import com.tapsell.task3.entities.WeekAdvertiseStatistics
 import com.tapsell.task3.repositories.DailyAdvertiseStatisticsRepository
 import com.tapsell.task3.repositories.WeekAdvertiseStatisticsRepository
 import org.slf4j.LoggerFactory
@@ -16,7 +15,7 @@ class WeekStatAggregate(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
 
 
-    @Scheduled(/*fixedRate = 60000, */cron = "0 0 0 * * *") // this is set to one minutes except of one day
+    @Scheduled(cron = "0 0 0 * * *")
     fun aggregate() {
         val lastWeekDays = (1..6).map {
             Duration.ofMillis(Date().time).toDays() - it

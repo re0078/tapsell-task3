@@ -1,5 +1,7 @@
 package com.tapsell.task3.services
 
+import com.tapsell.task3.configurations.kafkaConfig.GeneralConfigurations.TopicNames
+import com.tapsell.task3.configurations.kafkaConfig.ConsumerConfiguration.Companion.consumerGroupId
 import com.tapsell.task3.entities.AdvertiseEvent
 import com.tapsell.task3.models.ImpressionEvent
 import com.tapsell.task3.repositories.AdvertiseEventRepository
@@ -17,17 +19,17 @@ class ImpressionEventService(val requestService: RequestService,
 
         requestService.logger.info("impression event ${impressionEvent.requestId} received")
 
-        requestService.kafkaTemplate.send("impressionEv", impressionEvJson)
+        requestService.kafkaTemplate.send(TopicNames.IMPRESSION_EVENT, impressionEvJson)
 
         requestService.logger.info("impressionEv $impressionEvent.requestId sent to kafka queue")
     }
 
-    @KafkaListener(groupId = "advertiseEvent", topics = ["impressionEv"])
+    @KafkaListener(groupId = consumerGroupId, topics = [TopicNames.IMPRESSION_EVENT])
     fun popImpressionEvent(impressionJson: String) {
         val impressionEvent = requestService.objectMapper.readValue(impressionJson, ImpressionEvent::class.java)
         val eventDay = Duration.ofMillis(impressionEvent.impressionTime).toDays()
 
-        requestService.logger.info("in the pop impression event and json is $impressionJson")
+        requestService.logger.info("in the popImpressionEvent and json is $impressionJson")
         adEvRepo.save(AdvertiseEvent(impressionEvent.requestId,
                 impressionEvent.adID,
                 impressionEvent.adTitle,

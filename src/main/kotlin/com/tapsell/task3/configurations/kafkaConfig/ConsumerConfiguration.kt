@@ -63,10 +63,14 @@ class ConsumerConfiguration(val kafkaProperties: KafkaProperties) {
         properties.setProperty("bootstrap.servers", "localhost:9092")
         properties.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         properties.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.setProperty("group.id", "advertiseEvent");
+        properties.setProperty("group.id", consumerGroupId);
         consumerBuilder.properties = properties
-        val topics = arrayListOf("invalidClickEv")
+        val topics = arrayListOf(GeneralConfigurations.TopicNames.INVALID_CLICK_EVENT)
         consumerBuilder.topics = topics
         return consumerBuilder
+    }
+
+    companion object {
+        const val consumerGroupId: String = "advertiseEvent"
     }
 }

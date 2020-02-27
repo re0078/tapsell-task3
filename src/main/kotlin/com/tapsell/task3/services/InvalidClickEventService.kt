@@ -5,6 +5,7 @@ import com.tapsell.task3.entities.AdvertiseEvent
 import com.tapsell.task3.models.ClickEvent
 import com.tapsell.task3.models.InvalidClickEventConsumerBuilder
 import com.tapsell.task3.repositories.AdvertiseEventRepository
+import com.tapsell.task3.configurations.kafkaConfig.GeneralConfigurations.TopicNames
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -44,7 +45,7 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
                     adEventRepo.save(adEvent.get())
                 }
             } else {
-                requestService.kafkaTemplate.send("invalidClickEv", record.value())
+                requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, record.value())
             }
         }
     }
@@ -52,7 +53,7 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
 
     @Scheduled(fixedRate = 120000) // creating period margin for invalid click consumer to seperate clicks of specific periods of 2 minutes
     fun sendMargin() {
-        requestService.kafkaTemplate.send("invalidClickEv", Margin.CLICK_EVENT_MARGIN.string)
+        requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, Margin.CLICK_EVENT_MARGIN.string)
     }
 
 }

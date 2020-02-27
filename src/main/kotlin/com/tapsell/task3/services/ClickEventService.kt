@@ -9,7 +9,8 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.*
-
+import com.tapsell.task3.configurations.kafkaConfig.GeneralConfigurations.TopicNames
+import com.tapsell.task3.configurations.kafkaConfig.ConsumerConfiguration.Companion.consumerGroupId
 
 @Service
 class ClickEventService(val requestService: RequestService,
@@ -23,12 +24,12 @@ class ClickEventService(val requestService: RequestService,
 
         logger.info("click event received : $clickEvent")
 
-        requestService.kafkaTemplate.send("clickEv", clickJson)
+        requestService.kafkaTemplate.send(TopicNames.CLICK_EVENT, clickJson)
 
         logger.info("click event ${clickEvent.requestId} sent to kafka queue")
     }
 
-    @KafkaListener(groupId = "advertiseEvent", topics = ["clickEv"])
+    @KafkaListener(groupId = consumerGroupId, topics = [TopicNames.CLICK_EVENT])
     fun popClickEvent(clickEvJson: String) {
         val clickEvent = requestService.objectMapper.readValue(clickEvJson, ClickEvent::class.java)
         val eventDay = Duration.ofMillis(clickEvent.impressionTime).toDays() + 0 // todo omit duplication
@@ -39,7 +40,7 @@ class ClickEventService(val requestService: RequestService,
             adEvRepo.save(newAdEv)
             requestService.updateDailyEventStat(eventDay, clickEvent.adId, clickEvent.appId, false)
         } else {
-            requestService.kafkaTemplate.send("invalidClickEv", clickEvJson)
+            requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, clickEvJson)
         }
     }
 }
