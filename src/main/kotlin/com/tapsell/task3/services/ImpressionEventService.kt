@@ -38,7 +38,7 @@ class ImpressionEventService(val requestService: RequestService,
                 impressionEvent.appTitle,
                 impressionEvent.impressionTime,
                 null))
-        requestService.updateDailyEventStat(eventDay, impressionEvent.adID, impressionEvent.appId, true)
+        requestService.upsertDailyStatByImpressionEv(eventDay, impressionEvent.adID, impressionEvent.appId)
     }
 
 }

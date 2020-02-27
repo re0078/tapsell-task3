@@ -38,7 +38,7 @@ class ClickEventService(val requestService: RequestService,
             val newAdEv = adEvent.get()
             newAdEv.clickTime = clickEvent.clickTime
             adEvRepo.save(newAdEv)
-            requestService.updateDailyEventStat(eventDay, clickEvent.adId, clickEvent.appId, false)
+            requestService.updateDailyStatByClickEv(eventDay, clickEvent.adId, clickEvent.appId) // passing 3 parameters because of performed task on day argument
         } else {
             requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, clickEvJson)
         }
