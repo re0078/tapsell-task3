@@ -18,12 +18,11 @@ class RequestService(
 
 
     fun updateDailyEventStat(day: Long, adId: String, appId: String, newImpression: Boolean) {
-        val dailyAdStatList = dailyAdEvRepo.findByDayAndAdIdAndAppId(day, adId, appId)
+        val dailyAdStatRecord = dailyAdEvRepo.findByDayAndAdIdAndAppId(day, adId, appId)
 
-        if (dailyAdStatList.isNotEmpty()) {
-            val dailyAdStat = dailyAdStatList[0] // there is only one element in the list
-            if (newImpression) dailyAdStat.impressionCount += 1 else dailyAdStat.clickCount += 1
-            dailyAdEvRepo.insertRecord(dailyAdStat.day, dailyAdStat.adId, dailyAdStat.appId, dailyAdStat.impressionCount, dailyAdStat.clickCount)
+        if (dailyAdStatRecord.isPresent) {
+            if (newImpression) dailyAdStatRecord.get().impressionCount += 1 else dailyAdStatRecord.get().clickCount += 1
+            dailyAdEvRepo.insertRecord(dailyAdStatRecord.get().day, dailyAdStatRecord.get().adId, dailyAdStatRecord.get().appId, dailyAdStatRecord.get().impressionCount, dailyAdStatRecord.get().clickCount)
         } else {
 
             dailyAdEvRepo.insertRecord(day, adId, appId, if (newImpression) 1 else 0, if (newImpression) 0 else 1)

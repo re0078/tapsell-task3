@@ -11,7 +11,7 @@ class WeekAdvertiseStatistics(
         @Column
         val appId: String,
         @Column
-        val impressionCount: Int,
+        var impressionCount: Int,
         @Column
-        val clickCount: Int
+        var clickCount: Int
 )

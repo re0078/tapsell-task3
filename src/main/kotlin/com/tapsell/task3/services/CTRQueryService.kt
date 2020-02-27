@@ -3,7 +3,6 @@ package com.tapsell.task3.services
 import com.tapsell.task3.entities.CTRStatRecord
 import com.tapsell.task3.repositories.DailyAdvertiseStatisticsRepository
 import com.tapsell.task3.repositories.WeekAdvertiseStatisticsRepository
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -51,7 +50,6 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
                 (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
     }
 
-    @Cacheable(value = ["redis"], key = "#appId")
     fun queryForAppId(appId: String) {
         val todayStatList = dailyAdStatRepo.findByDayAndAppId(today, appId)
 
@@ -66,15 +64,14 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
                 (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
     }
 
-    @Cacheable(value = ["redis"], key = "{#adId, #appId}")
     fun queryForAdIdAndAppId(adId: String, appId: String) {
-        val todayStatList = dailyAdStatRepo.findByDayAndAdIdAndAppId(today, adId, appId)
-        val todayImpressionCount = todayStatList.sumBy { stat -> stat.impressionCount }.toDouble()
-        val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }
+        val todayStat = dailyAdStatRepo.findByDayAndAdIdAndAppId(today, adId, appId)
+        val todayImpressionCount = todayStat.get().impressionCount.toDouble()
+        val todayClickCount = todayStat.get().clickCount
 
-        val weekStatList = weekAdStatRepo.findByAdIdAndAppId(adId, appId)
-        val weekImpressionCount = weekStatList.sumBy { it.impressionCount }
-        val weekClickCount = weekStatList.sumBy { it.clickCount }
+        val weekStatRecord = weekAdStatRepo.findByAdIdAndAppId(adId, appId)
+        val weekImpressionCount = weekStatRecord.get().impressionCount
+        val weekClickCount = weekStatRecord.get().clickCount
         println("doing queries for appID and ad ID..")
         redisTemplate.opsForValue().set(CTRStatRecord(adId, appId).toString(),
                 (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount))
