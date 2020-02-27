@@ -2,8 +2,8 @@ package com.tapsell.task3.entities
 
 
 class CTRStatRecord(
-        val adId: String?,
-        val appId: String?
+        val adId: String,
+        val appId: String
 ) {
 
     override fun toString(): String {

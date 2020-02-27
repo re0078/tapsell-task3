@@ -13,6 +13,9 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import java.time.Duration
 
+object CTRTimeTOLive {
+    const val IN_MILLIS: Long = 30 * 60 * 1000
+}
 
 @Configuration
 @EnableCaching
