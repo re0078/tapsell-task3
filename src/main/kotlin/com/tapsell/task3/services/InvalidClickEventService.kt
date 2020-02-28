@@ -18,42 +18,18 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
                                val requestService: RequestService) {
 
     private val invalidEvConsumer = invalidClickConsumerBuilder.build()
+    // this should not be a bean because of the need to have multiple consumers with custom settings
+    // the only thing is gonna change for that purpose is the names of the main and builder classes
 
-    enum class Margin(val string: String) {
-        CLICK_EVENT_MARGIN("CLICK_EVENT_MARGIN")
-    }
-
-    @Scheduled(fixedRate = 120000, initialDelay = 125000) // 2 minutes and 5 seconds delay and then do this task every 2 minutes
+    @Scheduled(fixedRate = 120000, initialDelay = 125000) // 2 minutes delay and then does this task every 2 minutes
     fun readInvalidEvents() {
-        println("read invalid function called")
         val records: ConsumerRecords<String, String>? = invalidEvConsumer.poll(1000)
-        var endOfPeriod = false
         records?.forEach { record ->
-            val clickEvJson: String = record.value()
-            println("invalid key of $clickEvJson found")
-            var clickEvent: ClickEvent = ClickEvent("", 0, 0, "", "")
-            try {
-                clickEvent = objectMapper.readValue(clickEvJson, ClickEvent::class.java)
-            } catch (e: Exception) {
-//                if (endOfPeriod) return
-                endOfPeriod = true
-            }
-            if (!endOfPeriod) {
-                val adEvent: Optional<AdvertiseEvent> = adEventRepo.findById(clickEvent.requestId)
-                if (adEvent.isPresent) {
-                    adEvent.get().clickTime = clickEvent.clickTime
-                    adEventRepo.save(adEvent.get())
-                }
-            } else {
-                requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, record.value())
-            }
+            val clickEvent = objectMapper.readValue(record.value(), ClickEvent::class.java)
+            if (adEventRepo.findById(clickEvent.requestId).isPresent)
+                requestService.updateDailyStatByClickEv(clickEvent)
+            else requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, record.value())
         }
-    }
-
-
-    @Scheduled(fixedRate = 120000) // creating period margin for invalid click consumer to seperate clicks of specific periods of 2 minutes
-    fun sendMargin() {
-        requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, Margin.CLICK_EVENT_MARGIN.string)
     }
 
 }

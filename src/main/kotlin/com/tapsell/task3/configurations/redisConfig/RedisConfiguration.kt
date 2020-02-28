@@ -46,13 +46,6 @@ class RedisConfiguration(val env: Environment) {
                 .build()
     }
 
-    //
-//
-//    @Bean
-//    fun jedisConnectionFactory(): JedisConnectionFactory? {
-//        return JedisConnectionFactory()
-//    }
-//
     @Bean
     fun redisTemplate(): RedisTemplate<String, Double>? {
         val template = RedisTemplate<String, Double>()

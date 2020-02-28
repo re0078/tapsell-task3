@@ -3,8 +3,9 @@ package com.tapsell.task3.entities
 import org.springframework.data.cassandra.core.mapping.Column
 import org.springframework.data.cassandra.core.mapping.PrimaryKey
 import org.springframework.data.cassandra.core.mapping.Table
+import com.tapsell.task3.configurations.cassandraConfig.CassandraConfiguration.TableNames
 
-@Table(value = "adEvent")
+@Table(value = TableNames.ADVERTISE_EVENT)
 class AdvertiseEvent(
         @PrimaryKey
         val requestID: String,

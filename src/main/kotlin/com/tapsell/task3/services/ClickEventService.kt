@@ -32,13 +32,12 @@ class ClickEventService(val requestService: RequestService,
     @KafkaListener(groupId = consumerGroupId, topics = [TopicNames.CLICK_EVENT])
     fun popClickEvent(clickEvJson: String) {
         val clickEvent = requestService.objectMapper.readValue(clickEvJson, ClickEvent::class.java)
-        val eventDay = Duration.ofMillis(clickEvent.impressionTime).toDays() + 0 // todo omit duplication
         val adEvent: Optional<AdvertiseEvent> = adEvRepo.findById(clickEvent.requestId)
         if (adEvent.isPresent) {
             val newAdEv = adEvent.get()
             newAdEv.clickTime = clickEvent.clickTime
             adEvRepo.save(newAdEv)
-            requestService.updateDailyStatByClickEv(eventDay, clickEvent.adId, clickEvent.appId) // passing 3 parameters because of performed task on day argument
+            requestService.updateDailyStatByClickEv(clickEvent)
         } else {
             requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, clickEvJson)
         }

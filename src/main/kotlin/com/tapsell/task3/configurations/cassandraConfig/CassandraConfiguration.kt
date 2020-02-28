@@ -1,5 +1,6 @@
 package com.tapsell.task3.configurations.cassandraConfig
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.cassandra.config.AbstractCassandraConfiguration
@@ -20,7 +21,8 @@ class CassandraConfiguration : AbstractCassandraConfiguration() {
         const val FOR_WEEK_STAT = 2 * 86400  // 2 days in millis
     }
 
-    object TableNames{
+    object TableNames {
+        @Value("custom.property")
         const val ADVERTISE_EVENT = "adEvent"
         const val DAILY_STAT = "dailyStat"
         const val WEEK_STAT = "weekStat"

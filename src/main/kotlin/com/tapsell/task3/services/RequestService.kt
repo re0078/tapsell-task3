@@ -1,6 +1,7 @@
 package com.tapsell.task3.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.tapsell.task3.models.ClickEvent
 import com.tapsell.task3.models.ImpressionEvent
 import com.tapsell.task3.repositories.DailyAdvertiseStatisticsRepository
 import org.slf4j.Logger
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.*
 
 @Service
 class RequestService(
@@ -28,8 +30,9 @@ class RequestService(
         }
     }
 
-    fun updateDailyStatByClickEv(day: Long, adId: String, appId: String) {
-        val dailyAdStatRecord = dailyAdEvRepo.findByDayAndAdIdAndAppId(day, adId, appId)
+    fun updateDailyStatByClickEv(clickEvent: ClickEvent) {
+        val eventDay = Duration.ofMillis(Date(clickEvent.impressionTime).time).toDays()
+        val dailyAdStatRecord = dailyAdEvRepo.findByDayAndAdIdAndAppId(eventDay, clickEvent.adId, clickEvent.appId)
         dailyAdStatRecord.get().clickCount += 1
         dailyAdEvRepo.save(dailyAdStatRecord.get())
     }
