@@ -40,5 +40,4 @@ class ImpressionEventService(val requestService: RequestService,
                 null))
         requestService.upsertDailyStatByImpressionEv(eventDay, impressionEvent.adID, impressionEvent.appId)
     }
-
 }
