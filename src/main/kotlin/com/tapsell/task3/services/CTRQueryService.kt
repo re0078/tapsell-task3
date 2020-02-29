@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.annotation.PostConstruct
 
 
 @Service
@@ -62,15 +63,9 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
     }
 
 
-//    @PostConstruct
-//    fun deleteAllKeys() {
-//        var j = 0
-//        for (i in redisTemplate.keys(".+")) {
-//            j += 1
-//        }
-//        println("number of keys found $j")
-//        redisTemplate.delete(redisTemplate.keys(".+"))
-//    }
+    @PostConstruct
+    fun deleteAllKeys() {
+        redisTemplate.connectionFactory?.connection?.flushAll()
+    } // deleting all keys from all dbs in redis
 
-// todo create a method to clean redis
 }

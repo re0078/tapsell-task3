@@ -11,7 +11,6 @@ import java.util.*
 @Repository
 interface WeekAdvertiseStatisticsRepository : CassandraRepository<WeekAdvertiseStatistics, String> {
 
-
     @Query(value = "INSERT INTO ${KEY_SPACE_NAME}.${TableNames.WEEK_STAT} (adId, appId, impressionCount, clickCount)" +
             " VALUES (?0, ?1, ?2, ?3) USING ttl ${TimeToLive.FOR_WEEK_STAT}") // set to one day (time to live)
     fun insertRecord(adId: String, appId: String, impressionCount: Int, clickCount: Int)
