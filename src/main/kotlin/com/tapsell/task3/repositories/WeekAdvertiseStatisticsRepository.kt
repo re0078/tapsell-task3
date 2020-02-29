@@ -16,12 +16,9 @@ interface WeekAdvertiseStatisticsRepository : CassandraRepository<WeekAdvertiseS
             " VALUES (?0, ?1, ?2, ?3) USING ttl ${TimeToLive.FOR_WEEK_STAT}") // set to one day (time to live)
     fun insertRecord(adId: String, appId: String, impressionCount: Int, clickCount: Int)
 
-    @Query(value = "SELECT * FROM ${TableNames.WEEK_STAT} WHERE adId=?0 ALLOW FILTERING")
+    @Query(value = "SELECT * FROM ${TableNames.WEEK_STAT} WHERE adId=?0")
     fun findByAdId(adId: String): List<WeekAdvertiseStatistics>
 
-    @Query(value = "SELECT * FROM ${TableNames.WEEK_STAT} WHERE appId=?0 ALLOW FILTERING")
-    fun findByAppId(appId: String): List<WeekAdvertiseStatistics>
-
-    @Query(value = "SELECT * FROM ${TableNames.WEEK_STAT} WHERE adId=?0 AND appId=?1 ALLOW FILTERING")
+    @Query(value = "SELECT * FROM ${TableNames.WEEK_STAT} WHERE adId=?0 AND appId=?1")
     fun findByAdIdAndAppId(adId: String, appId: String): Optional<WeekAdvertiseStatistics>
 }

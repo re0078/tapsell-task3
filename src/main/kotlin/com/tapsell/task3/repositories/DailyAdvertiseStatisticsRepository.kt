@@ -21,13 +21,10 @@ interface DailyAdvertiseStatisticsRepository : CassandraRepository<DailyAdvertis
             " VALUES (?0, ?1, ?2, ?3, ?4) USING ttl ${TimeToLive.FOR_DAILY_STAT}") // time to live set to 8 days
     fun insertRecord(day: Long, adId: String, appId: String, impressionCount: Int, clickCount: Int)
 
-    @Query(value = "SELECT * FROM ${TableNames.DAILY_STAT} WHERE day=?0 AND adId=?1 ALLOW FILTERING")
+    @Query(value = "SELECT * FROM ${TableNames.DAILY_STAT} WHERE day=?0 AND adId=?1")
     fun findByDayAndAdId(day: Long, adId: String): List<DailyAdvertiseStatistics>
 
-    @Query(value = "SELECT * FROM ${TableNames.DAILY_STAT} WHERE day=?0 AND appId=?1 ALLOW FILTERING")
-    fun findByDayAndAppId(day: Long, appId: String): List<DailyAdvertiseStatistics>
-
-    @Query(value = "SELECT * FROM ${TableNames.DAILY_STAT} WHERE day=?0 AND adId=?1 AND appId=?2 ALLOW FILTERING")
+    @Query(value = "SELECT * FROM ${TableNames.DAILY_STAT} WHERE day=?0 AND adId=?1 AND appId=?2")
     fun findByDayAndAdIdAndAppId(day: Long, adId: String, appId: String): Optional<DailyAdvertiseStatistics>
 
 }

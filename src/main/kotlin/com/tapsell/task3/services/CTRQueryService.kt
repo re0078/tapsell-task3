@@ -27,27 +27,29 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         println("doing ctr queries")
         today = Duration.ofMillis(Date().time).toDays()
         dailyAdStatRepo.findByDay(today).forEach { findMatchingStats(CTRStatRecord(it.adId, it.appId)) }
-
         weekAdStatRepo.findAll().forEach { findMatchingStats(CTRStatRecord(it.adId, it.appId)) }
     }
 
     fun findMatchingStats(keyObject: CTRStatRecord) {
-        if (redisTemplate.opsForValue().get(keyObject.stringOfAdId()) == null)
-            setRecords(key = keyObject.stringOfAdId(),
-                    todayStatList = dailyAdStatRepo.findByDayAndAdId(today, adId = keyObject.adId),
-                    weekStatList = weekAdStatRepo.findByAdId(keyObject.adId))
-        if (redisTemplate.opsForValue().get(keyObject.stringOfAppId()) == null)
-            setRecords(key = keyObject.stringOfAppId(),
-                    todayStatList = dailyAdStatRepo.findByDayAndAppId(today, appId = keyObject.appId),
-                    weekStatList = weekAdStatRepo.findByAppId(keyObject.appId))
-        if (redisTemplate.opsForValue().get(keyObject.toString()) == null) {
-            val dailyRecord = dailyAdStatRepo.findByDayAndAdIdAndAppId(today, adId = keyObject.adId, appId = keyObject.appId)
-            val weekRecord = weekAdStatRepo.findByAdIdAndAppId(adId = keyObject.adId, appId = keyObject.appId)
-            setRecords(key = keyObject.toString(),
-                    todayStatList = if (dailyRecord.isPresent) listOf(dailyRecord.get()) else listOf(),
-                    weekStatList = if (weekRecord.isPresent) listOf(weekRecord.get()) else listOf()
-            )
-        }
+        val weekStatListByAdId = weekAdStatRepo.findByAdId(keyObject.adId)
+        val weekStatByAdIdAndApID = weekStatListByAdId.find { it.appId == keyObject.appId }
+        val weekStatListByAppId = weekAdStatRepo.findAll().filter { it.appId == keyObject.appId }
+
+        val todayStatListByAdId = dailyAdStatRepo.findByDayAndAdId(today, keyObject.adId)
+        val todayStatByAdIdAndAppID = todayStatListByAdId.find { it.appId == keyObject.appId }
+        val todayStatListByAppId = dailyAdStatRepo.findByDay(today).filter { it.appId == keyObject.appId }
+
+        setRecords(key = keyObject.stringOfAdId(),
+                todayStatList = todayStatListByAdId,
+                weekStatList = weekStatListByAdId)
+
+        setRecords(key = keyObject.stringOfAppId(),
+                todayStatList = todayStatListByAppId,
+                weekStatList = weekStatListByAppId)
+
+        setRecords(key = keyObject.toString(),
+                todayStatList = if (todayStatByAdIdAndAppID != null) listOf(todayStatByAdIdAndAppID) else listOf(),
+                weekStatList = if (weekStatByAdIdAndApID != null) listOf(weekStatByAdIdAndApID) else listOf())
     }
 
     fun setRecords(key: String, todayStatList: List<DailyAdvertiseStatistics>, weekStatList: List<WeekAdvertiseStatistics>) {
@@ -55,10 +57,10 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
         val todayClickCount = todayStatList.sumBy { stat -> stat.clickCount }.toDouble()
         val weekImpressionCount = weekStatList.sumBy { it.impressionCount }.toDouble()
         val weekClickCount = weekStatList.sumBy { it.clickCount }.toDouble()
-
         val ctrValue = (todayClickCount + weekClickCount) / (todayImpressionCount + weekImpressionCount)
         redisTemplate.opsForValue().set(key, ctrValue, CTRTimeTOLive.IN_MILLIS, TimeUnit.MILLISECONDS)
     }
+
 
 //    @PostConstruct
 //    fun deleteAllKeys() {
@@ -70,5 +72,5 @@ class CTRQueryService(val dailyAdStatRepo: DailyAdvertiseStatisticsRepository,
 //        redisTemplate.delete(redisTemplate.keys(".+"))
 //    }
 
-    // todo create a method to clean redis
+// todo create a method to clean redis
 }
