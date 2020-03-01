@@ -20,13 +20,14 @@ class RequestService(
 
     val logger: Logger = LoggerFactory.getLogger(javaClass.simpleName)
 
-    fun upsertDailyStatByImpressionEv(day: Long, adId: String, appId: String) {
-        val dailyAdStatRecord = dailyAdEvRepo.findByDayAndAdIdAndAppId(day, adId, appId)
+    fun upsertDailyStatByImpressionEv(impressionEvent: ImpressionEvent) {
+        val eventDay = Duration.ofMillis(impressionEvent.impressionTime).toDays()
+        val dailyAdStatRecord = dailyAdEvRepo.findByDayAndAdIdAndAppId(eventDay, impressionEvent.adID, impressionEvent.appId)
         if (dailyAdStatRecord.isPresent) {
             dailyAdStatRecord.get().impressionCount += 1
             dailyAdEvRepo.insertRecord(dailyAdStatRecord.get().day, dailyAdStatRecord.get().adId, dailyAdStatRecord.get().appId, dailyAdStatRecord.get().impressionCount, dailyAdStatRecord.get().clickCount)
         } else {
-            dailyAdEvRepo.insertRecord(day, adId, appId, 1, 0)
+            dailyAdEvRepo.insertRecord(eventDay, impressionEvent.adID, impressionEvent.appId, 1, 0)
         }
     }
 

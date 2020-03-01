@@ -27,8 +27,6 @@ class ImpressionEventService(val requestService: RequestService,
     @KafkaListener(groupId = consumerGroupId, topics = [TopicNames.IMPRESSION_EVENT])
     fun popImpressionEvent(impressionJson: String) {
         val impressionEvent = requestService.objectMapper.readValue(impressionJson, ImpressionEvent::class.java)
-        val eventDay = Duration.ofMillis(impressionEvent.impressionTime).toDays()
-
         requestService.logger.info("in the popImpressionEvent and json is $impressionJson")
         adEvRepo.save(AdvertiseEvent(impressionEvent.requestId,
                 impressionEvent.adID,
@@ -38,6 +36,6 @@ class ImpressionEventService(val requestService: RequestService,
                 impressionEvent.appTitle,
                 impressionEvent.impressionTime,
                 null))
-        requestService.upsertDailyStatByImpressionEv(eventDay, impressionEvent.adID, impressionEvent.appId)
+        requestService.upsertDailyStatByImpressionEv(impressionEvent)
     }
 }

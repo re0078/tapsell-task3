@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
-class Test(val redisTemplate: RedisTemplate<String, Double>) {
+class CTRQueryController(val redisTemplate: RedisTemplate<String, Double>) {
 
-    @RequestMapping("/test")
+    @RequestMapping("/ctr")
     @ResponseBody
-    fun test(@RequestBody record: CTRStatRecord): String {
+    fun ctr(@RequestBody record: CTRStatRecord): String {
         val ops = redisTemplate.opsForValue()
         return "for both ${ops[record.toString()]}\n" +
                 "for adId ${ops[record.stringOfAdId()]}\n " +

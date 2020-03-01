@@ -28,8 +28,10 @@ class InvalidClickEventService(private val invalidClickConsumerBuilder: InvalidC
             val clickEvent = objectMapper.readValue(record.value(), ClickEvent::class.java)
             if (adEventRepo.findById(clickEvent.requestId).isPresent)
                 requestService.updateDailyStatByClickEv(clickEvent)
-            else requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, record.value())
+            else {
+                if (Date().time - clickEvent.clickTime < 120000)
+                    requestService.kafkaTemplate.send(TopicNames.INVALID_CLICK_EVENT, record.value())
+            }
         }
     }
-
 }
